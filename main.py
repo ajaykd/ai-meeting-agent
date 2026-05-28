@@ -1,6 +1,9 @@
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
+import smtplib
+from email.mime.text import MIMEText
+
 
 load_dotenv()
 
@@ -36,5 +39,33 @@ result = response.choices[0].message.content
 with open("meeting_summary.txt", "w", encoding="utf-8") as output_file:
     output_file.write(result)
 
-print("Fresh meeting summary file created successfully.")
+
+subject = "AI Generated Meeting Summary"
+
+body = result
+
+msg = MIMEText(body)
+
+sender_email= os.getenv("EMAIL_USER")
+receiver_email= os.getenv("EMAIL_RECIPIENT")
+password= os.getenv("EMAIL_PASS")
+
+msg["Subject"] = subject
+msg["From"] = sender_email
+msg["To"] = receiver_email
+
+server = smtplib.SMTP("smtp.gmail.com", 587)
+
+server.starttls()
+
+server.login(sender_email, password)
+
+server.send_message(msg)
+
+server.quit()
+
+print("Email sent successfully.")
+
+
+
 
